@@ -6,6 +6,18 @@ public class Guard : MonoBehaviour {
 
     public Transform pathHolder;
 
+    // 2. Make guard moving along the path
+
+    private void Start() {
+
+        Vector3[] waypoints = new Vector3[pathHolder.childCount]; // get array of all of the positions of the waypoints in the pathHolder
+        for (int i = 0; i < waypoints.Length; i++) { // loop through all indexes in our array
+            waypoints[i] = pathHolder.GetChild(i).position; // each waypoint with index i should be equal to each child (posistion) with index of i  
+        }
+    }
+
+    // 1. Draw spheres on each wayoint and connect them with lines
+
     void OnDrawGizmos() {
         Vector3 startPosition = pathHolder.GetChild(0).position; // startPosition is the position of the first waypoint
         Vector3 previousPosition = startPosition; // previousPosition is initially equal to the startPosition
