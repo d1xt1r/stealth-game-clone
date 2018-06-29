@@ -26,14 +26,14 @@ public class Guard : MonoBehaviour {
         Vector3 targetWaypoint = waypoints[targetWaypointIndex]; // the actuall position of the waypoint
 
         while (true) { // loop forever 
-            transform.position = Vector3.MoveTowards(transform.position, targetWaypoint, speed * Time.deltaTime); // move the guard from its current position to the target(next) waypoint with a maximum distance of speed * time.deltatime
-            if(transform.position == targetWaypoint) { // if we reach the targetWaypoint
-                targetWaypointIndex = (targetWaypointIndex + 1);/* % waypoints.Length;*/ // move onto the next waypoint and after you
+            transform.position = Vector3.MoveTowards(transform.position, targetWaypoint, speed * Time.deltaTime); // move the guard from its current position to the target(next) waypoint with a maximum distance of speed * time.deltatime            
+            if (transform.position == targetWaypoint) { // if we reach the targetWaypoint
+                targetWaypointIndex = (targetWaypointIndex + 1) % waypoints.Length;// increment targetWaypointIndex by one, and after the guard reach targetWaypointIndex 5 go to 0
                 print("I am at index " + targetWaypointIndex);
                 targetWaypoint = waypoints[targetWaypointIndex]; // targetWaypoint is set to the next waypoint index
                 yield return new WaitForSeconds(waitTime); // when the guard reach the next waypoint we want to wait for .3 seconds
             }
-            yield return null; // "wait until the next frame" - yeld for one frame between each iteration of the while loop
+            yield return null; // "wait until the next frame" - yeld for one frame between each iteration of the while loop - it will make the movement smooth.
         }
     }
 
