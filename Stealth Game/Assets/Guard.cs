@@ -39,7 +39,7 @@ public class Guard : MonoBehaviour {
                 //print("I am at index " + targetWaypointIndex);
                 targetWaypoint = waypoints[targetWaypointIndex]; // targetWaypoint is set to the next waypoint index
                 yield return new WaitForSeconds(waitTime); // when the guard reach the next waypoint we want to wait for .3 seconds
-                yield return StartCoroutine(TurnToFace(targetWaypoint));
+                yield return StartCoroutine(TurnToFace(targetWaypoint)); // after we finish the waiting at the waipoint we start TurnToFace, but waith while the guard is rotating
             }
             yield return null; // "wait until the next frame" - yeld for one frame between each iteration of the while loop - it will make the movement smooth.
         }
@@ -47,13 +47,14 @@ public class Guard : MonoBehaviour {
 
     // 3. Make guard rotate at each waypoint
 
-    IEnumerator TurnToFace(Vector3 lookTarget) {
-        Vector3 directionToLookTarget = (lookTarget - transform.position).normalized; // calculating the angle the guard will need to have on the Y axis to be facing the look target
-        float targetAngle = 90 - Mathf.Atan2(directionToLookTarget.z, directionToLookTarget.x) * Mathf.Rad2Deg; // Atan2 return angle in radians so wee need to user Rad2Deg
-        while (Mathf.DeltaAngle(transform.eulerAngles.y, targetAngle) > 0.05f)  { // while delta angle is greater than 0.05 keep rotating towards the target angle
-            float angle = Mathf.MoveTowardsAngle(transform.eulerAngles.y, targetAngle, turnSpeed * Time.deltaTime); //
-            transform.eulerAngles = Vector3.up * angle;
-            yield return null;
+    IEnumerator TurnToFace(Vector3 lookTarget) { // look target is each next waypoint
+        Vector3 directionToLookTarget = (lookTarget - transform.position).normalized; // if we know the direction to look at we can find the corresponing angle
+        float targetAngle = 90 - Mathf.Atan2(directionToLookTarget.z, directionToLookTarget.x) * Mathf.Rad2Deg; // calculating the angle the guard will need to have on the Y axis to be facing the look target
+        while (Mathf.DeltaAngle(transform.eulerAngles.y, targetAngle) > 0.05f)  { // stop the while loop once the gard is facing the look target. While delta angle is greater than 0.05 keep rotating towards the target angle
+            float angle = Mathf.MoveTowardsAngle(transform.eulerAngles.y, targetAngle, turnSpeed * Time.deltaTime); // rotate the guard going from the current rotation on the y axis to the target angle with a "speed" of turnSpeed * Time.deltaTime;
+            transform.eulerAngles = Vector3.up * angle; // rotation is equal to rotation on the y axis multiplied by the angle
+            print(transform.eulerAngles);
+            yield return null; // "wait until the next frame" - yeld for one frame between each iteration of the while loop - it will make the movement smooth.
         }
 
     }
