@@ -8,9 +8,16 @@ public class Guard : MonoBehaviour {
     public float waitTime = .3f; // how much the guard will stay at each waypoint
     public float turnSpeed = 90f; // 90 degrees per second - the turn speed of the guard
 
+    public Light spotLight;
+    public float viewDistance;
+    float viewAngle;
+
     public Transform pathHolder;
+    Transform player;
 
     private void Start() {
+        player = GameObject.FindGameObjectWithTag("Player").transform; // reference to the player object then get the transform
+        viewAngle = spotLight.spotAngle;
 
         // 2.1 Make guard follow the path
 
@@ -21,6 +28,13 @@ public class Guard : MonoBehaviour {
         }
 
         StartCoroutine(FollowPath(waypoints)); // start the coroutine
+    }
+
+    bool CanSeePlayer() {
+        if (Vector3.Distance(transform.position, player.position) < viewDistance) { // if the distance between guard and the player is less than viewDistance 
+            Vector3 directionToPlayer = (player.position - transform.position).normalized; // if the angle between guards forward direction and the direction to player is within the view angle of the guard
+            float angleBetweenGuardAndPlayer = Vector3.Angle(transform.forward, directionToPlayer); // getting the angle between guard and player
+        } 
     }
 
     // 2.1 Make guard follow the path
@@ -34,6 +48,7 @@ public class Guard : MonoBehaviour {
 
         while (true) { // loop forever 
             transform.position = Vector3.MoveTowards(transform.position, targetWaypoint, speed * Time.deltaTime); // move the guard from its current position to the target(next) waypoint with a maximum distance of speed * time.deltatime            
+
             if (transform.position == targetWaypoint) { // if we reach the targetWaypoint
                 targetWaypointIndex = (targetWaypointIndex + 1) % waypoints.Length;// increment targetWaypointIndex by one, and after the guard reach targetWaypointIndex 5 go to 0
                 //print("I am at index " + targetWaypointIndex);
@@ -50,7 +65,8 @@ public class Guard : MonoBehaviour {
     IEnumerator TurnToFace(Vector3 lookTarget) { // look target is each next waypoint
         Vector3 directionToLookTarget = (lookTarget - transform.position).normalized; // if we know the direction to look at we can find the corresponing angle
         float targetAngle = 90 - Mathf.Atan2(directionToLookTarget.z, directionToLookTarget.x) * Mathf.Rad2Deg; // calculating the angle the guard will need to have on the Y axis to be facing the look target
-        while (Mathf.DeltaAngle(transform.eulerAngles.y, targetAngle) > 0.05f)  { // stop the while loop once the gard is facing the look target. While delta angle is greater than 0.05 keep rotating towards the target angle
+
+        while (Mathf.Abs(Mathf.DeltaAngle(transform.eulerAngles.y, targetAngle)) > 0.05f)  { // stop the while loop once the gard is facing the look target. While delta angle is greater than 0.05 keep rotating towards the target angle. If the angle is anticlockwise aka negative Mathf.Abs will make it positive.
             float angle = Mathf.MoveTowardsAngle(transform.eulerAngles.y, targetAngle, turnSpeed * Time.deltaTime); // rotate the guard going from the current rotation on the y axis to the target angle with a "speed" of turnSpeed * Time.deltaTime;
             transform.eulerAngles = Vector3.up * angle; // rotation is equal to rotation on the y axis multiplied by the angle
             print(transform.eulerAngles);
@@ -70,5 +86,8 @@ public class Guard : MonoBehaviour {
             previousPosition = waypoint.position; // then the previousPosition get set to the current waypoint position so DrawLine will draw again from previousPosition which is now the next waypoint
         }
         Gizmos.DrawLine(previousPosition, startPosition); // close the loop - connect the last waypoint to the first waypoint
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawRay(transform.position, transform.forward * viewDistance); // draw ray from the guard currrent position to direction where guard is going multiplied by the view distance
     }
 }
